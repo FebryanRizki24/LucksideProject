@@ -1,0 +1,72 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+[x-cloak] {
+    display: none;
+}
+
+@font-face {
+    font-family: 'Oswald';
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: url('https://fonts.gstatic.com/s/oswald/v48/TK3iWkUHHAIjg752GT8G.woff2') format('woff2');
+}
+
+.nav-link.active {
+    color: #3F3F46 !important;
+    font-weight: bold !important;
+    border-bottom: 2px solid #E0E0E0 !important;
+}
+
+/* Samakan ukuran dan border dropdown */
+.select2-container .select2-selection--single {
+    height: 42px !important;
+    display: flex;
+    align-items: center;
+    border: 1px solid #d1d5db !important;
+    border-radius: 6px !important;
+}
+
+/* Sesuaikan padding text agar sejajar */
+.select2-selection__rendered {
+    padding-left: 14px !important;
+    font-size: 16px !important;
+    color: #6b7280 !important;
+}
+
+/* Samakan panah dropdown */
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    right: 12px !important;
+}
+
+/* Hilangkan panah bawaan Select2 */
+.select2-container--default .select2-selection--single .select2-selection__arrow b {
+    display: none !important;
+}
+
+/* Tambahkan ikon panah custom */
+.select2-container--default .select2-selection--single {
+    position: relative;
+}
+
+.select2-container--default .select2-selection--single::after {
+    content: '\f078'; /* FontAwesome down arrow */
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6b7280;
+    font-size: 14px;
+}
+
+/* Ubah warna placeholder menjadi hitam */
+.select2-container--default .select2-selection--single .select2-selection__placeholder {
+    color: #000 !important; /* Warna hitam */
+    font-weight: 500; /* Tambahkan ketebalan jika perlu */
+}

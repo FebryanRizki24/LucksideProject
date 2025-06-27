@@ -12,12 +12,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('barberman_schedules', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
             $table->uuid('barberman_id');
-            $table->string('day');
+            // $table->string('day');
             $table->time('start_time');
             $table->time('end_time');
             $table->timestamps();
+            $table->softDeletes();
 
             $table->foreign('barberman_id')->references('id')->on('barbermans')->onDelete('cascade');
         });

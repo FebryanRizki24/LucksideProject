@@ -26,15 +26,47 @@ class UserSeeder extends Seeder
             'email_verified_at' => now(),
         ]);
 
+        $barberman = User::create([
+            'id' => Str::uuid(),
+            'name' => "Rudy Alamsyah",
+            'email' => "rudybarberman@gmail.com",
+            'password' => Hash::make('password'),
+            'email_verified_at' => now(),
+        ]);
+
         // Reset cached roles and permissions
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
         $permissions = [
-            'role' => [
-                'role-index',
-                'role-store',
-                'role-update',
-                'role-destroy',
+            'hairstyle' => [
+                'hairstyle-view',
+                'hairstyle-store',
+                'hairstyle-update',
+                'hairstyle-destroy',
+            ],
+            'barberman' => [
+                'barberman-view',
+                'barberman-store',
+                'barberman-update',
+                'barberman-destroy',
+            ],
+            'barbermanSchedule' => [
+                'barbermanSchedule-view',
+                'barbermanSchedule-store',
+                'barbermanSchedule-update',
+                'barbermanSchedule-destroy',
+            ],
+            'booking' => [
+                'booking-view',
+                'booking-store',
+                'booking-update',
+                'booking-destroy',
+            ],
+            'user' => [
+                'user-view',
+                'user-store',
+                'user-update',
+                'user-destroy',
             ]
         ];
 
@@ -47,12 +79,16 @@ class UserSeeder extends Seeder
             }
         }
 
-        $admin_role = Role::create(['name' => 'admin'])->givePermissionTo([
+        Role::create(['name' => 'admin'])->givePermissionTo([
             $permissions
         ]);
-        $admin = $admin->fresh();
-        $admin->syncRoles(['admin']);
+        // $admin = $admin->fresh();
+        $admin->assignRole(['admin']);
 
-        Role::create(['name' => 'User']);
+        Role::create(['name' => 'user'])->givePermissionTo(['booking-view']);
+
+        Role::create(['name' => 'barberman'])->givePermissionTo(['booking-view']);
+
+        $barberman->assignRole(['barberman']);
     }
 }
