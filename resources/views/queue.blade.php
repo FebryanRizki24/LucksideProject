@@ -20,41 +20,29 @@
     @livewireStyles
 </head>
 
-<body>
-    <div class="flex justify-between items-center px-[74px] py-4 border-b shadow">
+<body class="flex flex-col h-screen">
+    <!-- HEADER -->
+    <div class="px-4 md:px-[74px] py-4 border-b shadow flex justify-between items-center">
         <a href="{{ route('welcome') }}">
             <img src="{{ asset('images/assets/logo.svg') }}" alt="Logo" class="h-8 lg:h-10 w-auto">
         </a>
-        <h1 class="text-2xl font-oswald">DAFTAR ANTREAN</h1>
-        <div class="text-right text-sm">
+        <h1 class="text-xl md:text-2xl font-oswald">DAFTAR ANTREAN</h1>
+        <div class="text-right text-xs md:text-sm">
             <div>{{ \Carbon\Carbon::now()->translatedFormat('l, d-m-Y') }}</div>
             <div id="clock">00:00:00</div>
         </div>
     </div>
 
-    <div class="mx-auto mt-10 w-[80%] h-[300px] border border-black"></div>
-
-    <div class="flex justify-center gap-6 mt-12 ">
-        @for ($i = 0; $i < 3; $i++)
-            <div class="border w-[220px] shadow">
-                <div class="bg-gray-100 text-center font-bold py-2 border-b">Rudy Alamsyah</div>
-                <div class="flex">
-                    <div class="flex-1 flex flex-col items-center justify-center py-6 border-r text-4xl font-bold">
-                        <div>1</div>
-                        <div class="text-sm font-normal mt-1">Anonim</div>
-                    </div>
-                    <div class="flex-1 flex flex-col justify-center py-2 px-2 space-y-2">
-                        <div class="border h-6"></div>
-                        <div class="border h-6"></div>
-                        <div class="border h-6"></div>
-                        <div class="border h-6"></div>
-                    </div>
-                </div>
-                <div class="bg-gray-100 text-center py-1 font-semibold border-t">5/5</div>
-            </div>
-        @endfor
+    <!-- BAGIAN ATAS -->
+    <div class="flex-1 flex items-center justify-center border px-4">
+        <div class="w-full md:w-[80%] h-[40%] md:h-[60%] border border-black"></div>
     </div>
 
+    <!-- BAGIAN BAWAH -->
+    <div id="queue-container" class="flex-1 flex flex-wrap justify-center gap-4 md:gap-8 p-4 overflow-y-auto">
+    </div>
+
+    <!-- Script Jam -->
     <script>
         function updateClock() {
             const now = new Date();
@@ -66,6 +54,57 @@
 
         setInterval(updateClock, 1000);
         updateClock();
+
+        async function fetchQueue() {
+            try {
+                const response = await fetch('/api/live-queue');
+                const data = await response.json();
+                updateQueueView(data);
+            } catch (error) {
+                console.error('Gagal memuat antrean:', error);
+            }
+        }
+
+        function updateQueueView(barbermans) {
+            const container = document.querySelector("#queue-container");
+            container.innerHTML = '';
+
+            barbermans.forEach(barberman => {
+                const card = document.createElement('div');
+                card.className =
+                    "border w-full sm:w-[250px] md:w-[280px] lg:w-[320px] shadow-xl rounded-lg overflow-hidden flex flex-col";
+
+                card.innerHTML = `
+                <div class="bg-gray-100 text-center font-bold py-3 text-base md:text-lg border-b">
+                    ${barberman.barberman_name}
+                </div>
+                <div class="flex flex-1">
+                    <div class="flex-1 flex flex-col items-center justify-center py-6 md:py-8 border-r text-4xl md:text-5xl font-bold">
+                        <div>${barberman.antrean_saat_ini?.antrean ?? '-'}</div>
+                        <div class="text-sm md:text-base font-normal mt-2">
+                            ${barberman.antrean_saat_ini?.customer_name ?? '-'}
+                        </div>
+                    </div>
+                    <div class="flex-1 flex flex-col items-start py-4 px-3 space-y-2">
+                        ${[...Array(5)].map((_, i) => {
+                            const next = barberman.antrean_akan_datang[i];
+                            return `<div class="border h-8 w-full rounded flex items-center px-2 text-sm">
+                                        ${next ? `${next.antrean} - ${next.customer_name}` : '-'}
+                                    </div>`;
+                        }).join('')}
+                    </div>
+                </div>
+                <div class="bg-gray-100 text-center py-2 text-sm md:text-base font-semibold border-t mt-auto">
+                    ${barberman.antrean_selesai.length} / ${barberman.jumlah_antrean}
+                </div>
+            `;
+
+                container.appendChild(card);
+            });
+        }
+
+        setInterval(fetchQueue, 5000);
+        fetchQueue();
     </script>
 </body>
 

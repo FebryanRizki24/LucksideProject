@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Barberman;
 use App\Models\Booking;
 use App\Models\BookingDetail;
 use App\Models\Queue;
@@ -15,6 +16,7 @@ class QueueController extends Controller
     {
         return view('queue');
     }
+
     public function processDailyQueue()
     {
         $today = Carbon::now()->format('Y-m-d');
@@ -91,5 +93,47 @@ class QueueController extends Controller
         return response()->json([
             'has_missing' => !empty($missingDetailIds)
         ]);
+    }
+
+    public function getLiveQueue()
+    {
+        $barbermen = Barberman::with(['queues' => function ($query) {
+            $query->select('queues.id', 'queues.booking_detail_id', 'queues.customer_name', 'queues.status', 'queues.antrean')
+                ->orderBy('queues.antrean');
+        }])->get(['id', 'name']);
+
+        $result = $barbermen->map(function ($barberman) {
+            $queues = $barberman->queues;
+
+            $current = $queues->firstWhere('status', 'in_service');
+            $upcoming = $queues->where('status', 'wait')->sortBy('antrean')->values();
+            $done = $queues->where('status', 'done')->values();
+
+            return [
+                'barberman_name' => $barberman->name,
+                'antrean_saat_ini' => $current ? [
+                    'customer_name' => $current->customer_name,
+                    'status' => $current->status,
+                    'antrean' => $current->antrean,
+                ] : null,
+                'antrean_akan_datang' => $upcoming->map(function ($q) {
+                    return [
+                        'customer_name' => $q->customer_name,
+                        'status' => $q->status,
+                        'antrean' => $q->antrean,
+                    ];
+                }),
+                'antrean_selesai' => $done->map(function ($q) {
+                    return [
+                        'customer_name' => $q->customer_name,
+                        'status' => $q->status,
+                        'antrean' => $q->antrean,
+                    ];
+                }),
+                'jumlah_antrean' => $queues->count(),
+            ];
+        });
+
+        return response()->json($result);
     }
 }

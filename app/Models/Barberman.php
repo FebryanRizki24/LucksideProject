@@ -32,4 +32,14 @@ class Barberman extends Model
         'photo',
         'status'
     ];
+
+    public function detailBookings()
+    {
+        return $this->hasMany(BookingDetail::class);
+    }
+
+    public function queues()
+    {
+        return $this->hasManyThrough(Queue::class, BookingDetail::class);
+    }
 }
